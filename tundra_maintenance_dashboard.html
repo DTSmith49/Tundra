@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2018 Toyota Tundra Maintenance Dashboard</title>
+    <title>2018 Toyota Tundra - Maintenance Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.1/css/materialdesignicons.min.css">
     <style>
         * {
             margin: 0;
@@ -11,894 +12,1425 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --critical: #dc3545;
+            --overdue: #fd7e14;
+            --due-soon: #ffc107;
+            --ok: #28a745;
+            --primary: #2a5298;
+            --secondary: #1e3c72;
+            --bg-light: #f7f9fc;
+            --card-bg: #ffffff;
+            --border-color: #e1e4e8;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .wrapper {
+            display: flex;
             min-height: 100vh;
         }
 
-        .container {
+        /* ==================== SIDEBAR ==================== */
+        .sidebar {
+            width: 280px;
+            background: var(--card-bg);
+            border-right: 2px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 100;
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .sidebar-header {
+            padding: 30px 20px 20px;
+            border-bottom: 2px solid var(--border-color);
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+            color: white;
+        }
+
+        .sidebar-title {
+            font-size: 1.35em;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .sidebar-subtitle {
+            font-size: 0.85em;
+            opacity: 0.9;
+            font-weight: 500;
+        }
+
+        .nav-tabs {
+            display: flex;
+            flex-direction: column;
+            padding: 16px 0;
+        }
+
+        .nav-tab {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 20px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            color: var(--text-secondary);
+            border-left: 4px solid transparent;
+            transition: all 0.25s ease;
+            position: relative;
+            user-select: none;
+        }
+
+        .nav-tab:hover {
+            background-color: rgba(42, 82, 152, 0.08);
+            color: var(--primary);
+        }
+
+        .nav-tab.active {
+            background-color: rgba(42, 82, 152, 0.12);
+            color: var(--primary);
+            border-left-color: var(--primary);
+            font-weight: 600;
+        }
+
+        .nav-icon {
+            font-size: 1.3em;
+            width: 24px;
+            text-align: center;
+        }
+
+        /* ==================== MAIN CONTENT ==================== */
+        .main-content {
+            flex: 1;
+            padding: 30px 40px;
             max-width: 1400px;
             margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            overflow: hidden;
+            width: 100%;
         }
 
-        .header {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        /* ==================== TOOLBAR ==================== */
+        .floating-toolbar {
+            position: fixed;
+            right: 30px;
+            bottom: 30px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            display: flex;
+            gap: 12px;
+            padding: 14px 18px;
+            z-index: 200;
+            align-items: center;
+        }
+
+        .toolbar-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--primary);
             color: white;
-            padding: 40px;
-            text-align: center;
-        }
-
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-
-        .header p {
-            font-size: 1.1em;
-            opacity: 0.9;
-        }
-
-        .vehicle-info {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            padding: 30px 40px;
-            background: #f8f9fa;
-            border-bottom: 3px solid #e9ecef;
-        }
-
-        .info-card {
-            text-align: center;
-            padding: 15px;
-            background: white;
+            border: none;
+            padding: 10px 18px;
             border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .info-label {
-            font-size: 0.85em;
-            color: #6c757d;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-        }
-
-        .info-value {
-            font-size: 1.3em;
             font-weight: 600;
-            color: #2a5298;
+            font-size: 0.95em;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            white-space: nowrap;
         }
 
-        .summary-cards {
+        .toolbar-btn:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(42, 82, 152, 0.3);
+        }
+
+        .toolbar-btn .mdi {
+            font-size: 1.2em;
+        }
+
+        /* ==================== SUMMARY CARD ==================== */
+        .summary-section {
+            background: var(--card-bg);
+            border-radius: 14px;
+            padding: 28px;
+            margin-bottom: 28px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+            border: 2px solid var(--border-color);
+        }
+
+        .summary-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            padding: 40px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 24px;
         }
 
-        .summary-card {
-            padding: 30px;
-            border-radius: 15px;
-            color: white;
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            transition: transform 0.3s ease;
-        }
-
-        .summary-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .summary-card.critical {
-            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-        }
-
-        .summary-card.overdue {
-            background: linear-gradient(135deg, #fd7e14 0%, #e8590c 100%);
-        }
-
-        .summary-card.due-soon {
-            background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
-        }
-
-        .summary-card.ok {
-            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
-        }
-
-        .summary-number {
-            font-size: 3em;
-            font-weight: 700;
-            margin-bottom: 10px;
+        .summary-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
 
         .summary-label {
-            font-size: 1.1em;
+            font-size: 0.9em;
+            color: var(--text-secondary);
             text-transform: uppercase;
             letter-spacing: 1px;
+            font-weight: 600;
         }
 
-        .content {
-            padding: 40px;
+        .summary-value {
+            font-size: 1.65em;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: -0.5px;
         }
 
+        /* ==================== ALERT PANEL ==================== */
+        .alert-panel {
+            background: linear-gradient(135deg, rgba(220, 53, 69, 0.95) 0%, rgba(200, 35, 51, 0.95) 100%);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 28px;
+            border-left: 6px solid var(--critical);
+            box-shadow: 0 4px 16px rgba(220, 53, 69, 0.2);
+            color: white;
+            position: sticky;
+            top: 20px;
+            z-index: 50;
+        }
+
+        .alert-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.25em;
+            font-weight: 700;
+            margin-bottom: 16px;
+            letter-spacing: 0.5px;
+        }
+
+        .alert-header .mdi {
+            font-size: 1.4em;
+        }
+
+        .alert-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+        }
+
+        .alert-item {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 14px 16px;
+            border-radius: 8px;
+            border-left: 3px solid white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95em;
+            font-weight: 500;
+        }
+
+        .alert-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 0.9em;
+        }
+
+        /* ==================== SECTIONS ==================== */
         .section {
-            margin-bottom: 50px;
+            display: none;
+        }
+
+        .section.active {
+            display: block;
         }
 
         .section-title {
-            font-size: 1.8em;
-            color: #2a5298;
-            margin-bottom: 25px;
-            padding-bottom: 10px;
-            border-bottom: 3px solid #667eea;
+            font-size: 1.6em;
+            font-weight: 700;
+            color: var(--secondary);
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 3px solid var(--border-color);
+            letter-spacing: -0.5px;
+        }
+
+        /* ==================== FILTERS ==================== */
+        .filters-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 18px;
+            border: 2px solid var(--border-color);
+            background: var(--card-bg);
+            border-radius: 8px;
+            cursor: pointer;
             font-weight: 600;
+            font-size: 0.95em;
+            color: var(--text-secondary);
+            transition: all 0.25s ease;
+            white-space: nowrap;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .search-bar {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1em;
+            background: var(--card-bg);
+            color: var(--text-primary);
+            transition: all 0.25s ease;
+        }
+
+        .search-bar:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.1);
+        }
+
+        /* ==================== MAINTENANCE GRID ==================== */
+        .maintenance-category {
+            margin-bottom: 32px;
+        }
+
+        .category-header {
+            font-size: 1.25em;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: -0.3px;
+        }
+
+        .category-header .mdi {
+            font-size: 1.3em;
         }
 
         .maintenance-grid {
             display: grid;
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 18px;
         }
 
-        .maintenance-item {
-            background: white;
-            border: 2px solid #e9ecef;
-            border-radius: 12px;
-            padding: 25px;
+        .maintenance-card {
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            padding: 18px;
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
         }
 
-        .maintenance-item:hover {
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-            transform: translateX(5px);
+        .maintenance-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            border-color: var(--primary);
         }
 
-        .maintenance-item.critical {
-            border-left: 6px solid #dc3545;
-            background: #fff5f5;
+        .maintenance-card.critical {
+            border-left: 5px solid var(--critical);
+            background: linear-gradient(135deg, rgba(220, 53, 69, 0.04) 0%, transparent 100%);
         }
 
-        .maintenance-item.overdue {
-            border-left: 6px solid #fd7e14;
-            background: #fff9f0;
+        .maintenance-card.overdue {
+            border-left: 5px solid var(--overdue);
+            background: linear-gradient(135deg, rgba(253, 126, 20, 0.04) 0%, transparent 100%);
         }
 
-        .maintenance-item.due-soon {
-            border-left: 6px solid #ffc107;
-            background: #fffef0;
+        .maintenance-card.due-soon {
+            border-left: 5px solid var(--due-soon);
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.04) 0%, transparent 100%);
         }
 
-        .maintenance-item.ok {
-            border-left: 6px solid #28a745;
-            background: #f0fff4;
+        .maintenance-card.ok {
+            border-left: 5px solid var(--ok);
+            background: linear-gradient(135deg, rgba(40, 167, 69, 0.04) 0%, transparent 100%);
         }
 
-        .item-header {
+        .maintenance-header {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 12px;
         }
 
-        .item-title {
-            font-size: 1.3em;
-            font-weight: 600;
-            color: #212529;
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 1.1em;
+            flex-shrink: 0;
+        }
+
+        .status-indicator.critical {
+            background: rgba(220, 53, 69, 0.15);
+            color: var(--critical);
+        }
+
+        .status-indicator.overdue {
+            background: rgba(253, 126, 20, 0.15);
+            color: var(--overdue);
+        }
+
+        .status-indicator.due-soon {
+            background: rgba(255, 193, 7, 0.15);
+            color: var(--due-soon);
+        }
+
+        .status-indicator.ok {
+            background: rgba(40, 167, 69, 0.15);
+            color: var(--ok);
+        }
+
+        .maintenance-title {
+            font-weight: 700;
+            font-size: 1.08em;
+            color: var(--text-primary);
+            flex: 1;
         }
 
         .status-badge {
-            padding: 8px 16px;
-            border-radius: 20px;
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .status-badge.critical {
+            background: rgba(220, 53, 69, 0.2);
+            color: var(--critical);
+        }
+
+        .status-badge.overdue {
+            background: rgba(253, 126, 20, 0.2);
+            color: var(--overdue);
+        }
+
+        .status-badge.due-soon {
+            background: rgba(255, 193, 7, 0.2);
+            color: #856404;
+        }
+
+        .status-badge.ok {
+            background: rgba(40, 167, 69, 0.2);
+            color: var(--ok);
+        }
+
+        .maintenance-details {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .detail-row {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .detail-label {
+            font-size: 0.8em;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .detail-value {
+            font-size: 0.95em;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        /* ==================== SERVICE HISTORY TABLE ==================== */
+        .history-table-container {
+            overflow-x: auto;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--card-bg);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+            border: 2px solid var(--border-color);
+        }
+
+        .history-table thead {
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+            color: white;
+        }
+
+        .history-table th {
+            padding: 16px 14px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 0.95em;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .history-table td {
+            padding: 14px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.95em;
+        }
+
+        .history-table tbody tr:hover {
+            background-color: rgba(42, 82, 152, 0.04);
+        }
+
+        .history-date {
+            font-weight: 600;
+            color: var(--primary);
+            width: 90px;
+        }
+
+        .history-mileage {
+            color: var(--text-secondary);
+            font-weight: 500;
+            width: 100px;
+        }
+
+        .history-services {
+            color: var(--text-primary);
+            max-width: 400px;
+        }
+
+        .history-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 600;
+        }
+
+        .status-label {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 6px;
             font-size: 0.85em;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
-        .status-badge.critical {
-            background: #dc3545;
-            color: white;
+        .status-label.recall {
+            background: rgba(220, 53, 69, 0.2);
+            color: var(--critical);
         }
 
-        .status-badge.overdue {
-            background: #fd7e14;
-            color: white;
+        .status-label.major {
+            background: rgba(253, 126, 20, 0.2);
+            color: var(--overdue);
         }
 
-        .status-badge.due-soon {
-            background: #ffc107;
-            color: #212529;
+        .status-label.routine {
+            background: rgba(40, 167, 69, 0.2);
+            color: var(--ok);
         }
 
-        .status-badge.ok {
-            background: #28a745;
-            color: white;
-        }
+        /* ==================== RESPONSIVE DESIGN ==================== */
+        @media (max-width: 1024px) {
+            .wrapper {
+                flex-direction: column;
+            }
 
-        .item-details {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
-        }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 2px solid var(--border-color);
+                position: relative;
+            }
 
-        .detail-row {
-            padding: 10px 0;
-        }
+            .nav-tabs {
+                display: flex;
+                flex-direction: row;
+                overflow-x: auto;
+                padding: 8px 0;
+                margin: 0;
+            }
 
-        .detail-label {
-            font-size: 0.9em;
-            color: #6c757d;
-            margin-bottom: 5px;
-            font-weight: 500;
-        }
+            .nav-tab {
+                flex: 0 0 auto;
+                padding: 12px 16px;
+            }
 
-        .detail-value {
-            font-size: 1em;
-            color: #212529;
-            font-weight: 600;
-        }
-
-        .category-badge {
-            display: inline-block;
-            padding: 5px 12px;
-            background: #667eea;
-            color: white;
-            border-radius: 15px;
-            font-size: 0.85em;
-            margin-bottom: 10px;
-        }
-
-        .service-history {
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 25px;
-        }
-
-        .history-item {
-            background: white;
-            border-left: 4px solid #667eea;
-            padding: 20px;
-            margin-bottom: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-
-        .history-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .history-date {
-            font-size: 1.1em;
-            font-weight: 600;
-            color: #2a5298;
-            margin-bottom: 8px;
-        }
-
-        .history-mileage {
-            font-size: 0.95em;
-            color: #6c757d;
-            margin-bottom: 10px;
-        }
-
-        .history-services {
-            font-size: 0.95em;
-            color: #212529;
-            line-height: 1.6;
-        }
-
-        .alert-box {
-            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-            color: white;
-            padding: 25px;
-            border-radius: 12px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
-        }
-
-        .alert-title {
-            font-size: 1.5em;
-            font-weight: 600;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-        }
-
-        .alert-icon {
-            font-size: 1.5em;
-            margin-right: 10px;
-        }
-
-        .alert-list {
-            list-style: none;
-            font-size: 1.05em;
-            line-height: 1.8;
-        }
-
-        .alert-list li:before {
-            content: "⚠️ ";
-            margin-right: 10px;
+            .main-content {
+                padding: 20px 24px;
+            }
         }
 
         @media (max-width: 768px) {
-            .header h1 {
-                font-size: 1.8em;
+            .sidebar {
+                border-bottom: 2px solid var(--border-color);
             }
 
-            .summary-cards {
+            .nav-tabs {
+                flex-wrap: wrap;
+                padding: 12px 12px;
+            }
+
+            .nav-tab {
+                font-size: 0.9em;
+                padding: 10px 12px;
+                flex: 0 0 auto;
+            }
+
+            .main-content {
+                padding: 16px 14px;
+            }
+
+            .floating-toolbar {
+                right: 12px;
+                bottom: 12px;
+                padding: 10px 12px;
+                gap: 8px;
+                flex-wrap: wrap;
+            }
+
+            .toolbar-btn {
+                padding: 8px 12px;
+                font-size: 0.85em;
+            }
+
+            .maintenance-grid {
                 grid-template-columns: 1fr;
             }
 
-            .content {
-                padding: 20px;
+            .filters-toolbar {
+                gap: 8px;
+            }
+
+            .filter-btn {
+                padding: 6px 12px;
+                font-size: 0.85em;
+            }
+
+            .summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 16px;
+            }
+
+            .history-table {
+                font-size: 0.85em;
+            }
+
+            .history-table th,
+            .history-table td {
+                padding: 10px 8px;
             }
         }
 
-        .print-button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            font-size: 1.1em;
-            border-radius: 8px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            transition: transform 0.3s ease;
-            display: block;
-            margin: 30px auto;
-            font-weight: 600;
-        }
-
-        .print-button:hover {
-            transform: translateY(-2px);
-        }
-
-        @media print {
-            body {
-                background: white;
-                padding: 0;
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 12px 10px;
             }
 
-            .print-button {
+            .summary-section {
+                padding: 16px;
+                margin-bottom: 16px;
+            }
+
+            .summary-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .summary-value {
+                font-size: 1.4em;
+            }
+
+            .alert-panel {
+                padding: 16px;
+                margin-bottom: 16px;
+            }
+
+            .alert-grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .floating-toolbar {
+                right: 8px;
+                bottom: 8px;
+                padding: 8px 10px;
+            }
+
+            .toolbar-btn {
+                padding: 6px 10px;
+                font-size: 0.75em;
+            }
+
+            .maintenance-grid {
+                gap: 12px;
+            }
+
+            .history-table {
+                font-size: 0.75em;
+            }
+
+            .history-table th,
+            .history-table td {
+                padding: 8px 4px;
+            }
+
+            .section-title {
+                font-size: 1.3em;
+                margin-bottom: 16px;
+            }
+        }
+
+        @print {
+            .floating-toolbar,
+            .sidebar {
                 display: none;
             }
 
-            .maintenance-item:hover {
-                transform: none;
+            .wrapper {
+                flex-direction: column;
+            }
+
+            .main-content {
+                padding: 0;
+            }
+
+            .section {
+                display: block !important;
+                page-break-inside: avoid;
+            }
+
+            body {
+                background: white;
+            }
+        }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-light: #0f1419;
+                --card-bg: #1a1f2e;
+                --border-color: #30374f;
+                --text-primary: #e5e7eb;
+                --text-secondary: #9ca3af;
+            }
+
+            .sidebar {
+                border-right-color: var(--border-color);
+            }
+
+            .nav-tab:hover {
+                background-color: rgba(42, 82, 152, 0.12);
+            }
+
+            .search-bar:focus {
+                box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.2);
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🚗 2018 Toyota Tundra Maintenance Dashboard</h1>
-            <p>Comprehensive Maintenance Tracking & Analysis</p>
-        </div>
-
-        <div class="vehicle-info">
-            <div class="info-card">
-                <div class="info-label">Owner</div>
-                <div class="info-value">Dustin Smith</div>
+    <div class="wrapper">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">Tundra Dashboard</div>
+                <div class="sidebar-subtitle">2018 Toyota Tundra</div>
             </div>
-            <div class="info-card">
-                <div class="info-label">VIN</div>
-                <div class="info-value">...682035</div>
-            </div>
-            <div class="info-card">
-                <div class="info-label">Current Mileage</div>
-                <div class="info-value">48,721 mi</div>
-            </div>
-            <div class="info-card">
-                <div class="info-label">Last Service</div>
-                <div class="info-value">2025-01-15</div>
-            </div>
-        </div>
-
-        <div class="summary-cards">
-            <div class="summary-card critical">
-                <div class="summary-number">2</div>
-                <div class="summary-label">Critical Items</div>
-            </div>
-            <div class="summary-card overdue">
-                <div class="summary-number">3</div>
-                <div class="summary-label">Overdue</div>
-            </div>
-            <div class="summary-card due-soon">
-                <div class="summary-number">7</div>
-                <div class="summary-label">Due Soon/Now</div>
-            </div>
-            <div class="summary-card ok">
-                <div class="summary-number">6</div>
-                <div class="summary-label">Up to Date</div>
-            </div>
-        </div>
-
-        <div class="content">
-
-            <div class="alert-box">
-                <div class="alert-title">
-                    <span class="alert-icon">🚨</span>
-                    IMMEDIATE ATTENTION REQUIRED
+            <nav class="nav-tabs">
+                <div class="nav-tab active" onclick="switchSection('overview', this)">
+                    <span class="mdi mdi-view-dashboard nav-icon"></span>
+                    <span>Overview</span>
                 </div>
-                <ul class="alert-list">
-                    <li><strong>Transmission Fluid</strong> - DUE SOON - CRITICAL</li>
-                    <li><strong>Rear Differential Fluid</strong> - OVERDUE</li>
-                    <li><strong>Front Differential Fluid (4WD)</strong> - OVERDUE</li>
-                    <li><strong>Transfer Case Fluid (4WD)</strong> - DUE SOON</li>
-                </ul>
-            </div>
-            <div class="section">
-                <h2 class="section-title">📋 Maintenance Items by Category</h2>
-                <div class="maintenance-grid">
+                <div class="nav-tab" onclick="switchSection('alerts', this)">
+                    <span class="mdi mdi-alert-circle nav-icon"></span>
+                    <span>Critical Alerts</span>
+                </div>
+                <div class="nav-tab" onclick="switchSection('maintenance', this)">
+                    <span class="mdi mdi-wrench nav-icon"></span>
+                    <span>Maintenance</span>
+                </div>
+                <div class="nav-tab" onclick="switchSection('history', this)">
+                    <span class="mdi mdi-calendar-history nav-icon"></span>
+                    <span>Service History</span>
+                </div>
+                <div class="nav-tab" onclick="switchSection('tools', this)">
+                    <span class="mdi mdi-tools nav-icon"></span>
+                    <span>Tools & Export</span>
+                </div>
+            </nav>
+        </aside>
 
-                    <div class="maintenance-item ok">
-                        <span class="category-badge">Engine</span>
-                        <div class="item-header">
-                            <div class="item-title">Engine Oil & Filter</div>
-                            <span class="status-badge ok">OK</span>
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- OVERVIEW SECTION -->
+            <section id="overview" class="section active">
+                <div class="section-title">Vehicle Overview</div>
+
+                <div class="summary-section">
+                    <div class="summary-grid">
+                        <div class="summary-item">
+                            <span class="summary-label">Owner</span>
+                            <span class="summary-value">Dustin Smith</span>
                         </div>
-                        <div class="item-details">
-                            <div class="detail-row">
-                                <div class="detail-label">Manufacturer Interval</div>
-                                <div class="detail-value">Every 10,000 miles or 12 months</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Last Completed</div>
-                                <div class="detail-value">1/15/2025 @ 48,721 miles</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Next Due</div>
-                                <div class="detail-value">58,721 miles or 1/2026</div>
-                            </div>
+                        <div class="summary-item">
+                            <span class="summary-label">VIN (Last 6)</span>
+                            <span class="summary-value">...82035</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Current Mileage</span>
+                            <span class="summary-value">48,721 mi</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Last Service</span>
+                            <span class="summary-value">01/15/2025</span>
                         </div>
                     </div>
+                </div>
 
-                    <div class="maintenance-item due-soon">
-                        <span class="category-badge">Engine</span>
-                        <div class="item-header">
-                            <div class="item-title">Engine Air Filter</div>
-                            <span class="status-badge due-soon">DUE SOON</span>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 18px; margin-top: 24px;">
+                    <div class="summary-section" style="text-align: center; padding: 24px;">
+                        <div style="font-size: 2.2em; font-weight: 700; color: var(--critical); margin-bottom: 8px;">2</div>
+                        <div style="color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Critical Items</div>
+                    </div>
+                    <div class="summary-section" style="text-align: center; padding: 24px;">
+                        <div style="font-size: 2.2em; font-weight: 700; color: var(--overdue); margin-bottom: 8px;">3</div>
+                        <div style="color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Overdue</div>
+                    </div>
+                    <div class="summary-section" style="text-align: center; padding: 24px;">
+                        <div style="font-size: 2.2em; font-weight: 700; color: var(--due-soon); margin-bottom: 8px;">7</div>
+                        <div style="color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Due Soon</div>
+                    </div>
+                    <div class="summary-section" style="text-align: center; padding: 24px;">
+                        <div style="font-size: 2.2em; font-weight: 700; color: var(--ok); margin-bottom: 8px;">6</div>
+                        <div style="color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Up to Date</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ALERTS SECTION -->
+            <section id="alerts" class="section">
+                <div class="section-title">Critical Alerts & Urgent Items</div>
+
+                <div class="alert-panel" style="position: relative; top: 0;">
+                    <div class="alert-header">
+                        <span class="mdi mdi-alert-octagon"></span>
+                        Immediate Action Required
+                    </div>
+                    <div class="alert-grid">
+                        <div class="alert-item">
+                            <span class="alert-badge">1</span>
+                            <span><strong>Front Differential Fluid</strong> - OVERDUE</span>
                         </div>
-                        <div class="item-details">
-                            <div class="detail-row">
-                                <div class="detail-label">Manufacturer Interval</div>
-                                <div class="detail-value">Every 30,000 miles</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Last Completed</div>
-                                <div class="detail-value">Unknown (likely at 30K service 1/24/2022)</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Next Due</div>
-                                <div class="detail-value">60,000 miles</div>
-                            </div>
+                        <div class="alert-item">
+                            <span class="alert-badge">2</span>
+                            <span><strong>Rear Differential Fluid</strong> - OVERDUE</span>
+                        </div>
+                        <div class="alert-item">
+                            <span class="alert-badge">3</span>
+                            <span><strong>Brake Fluid</strong> - DUE NOW</span>
+                        </div>
+                        <div class="alert-item">
+                            <span class="alert-badge">4</span>
+                            <span><strong>Transmission Fluid</strong> - CRITICAL</span>
+                        </div>
+                        <div class="alert-item">
+                            <span class="alert-badge">5</span>
+                            <span><strong>Timing Belt</strong> - Age Limit Sept 2025</span>
                         </div>
                     </div>
+                </div>
 
-                    <div class="maintenance-item ok">
-                        <span class="category-badge">Engine</span>
-                        <div class="item-header">
-                            <div class="item-title">Spark Plugs</div>
-                            <span class="status-badge ok">OK</span>
+                <div class="summary-section" style="margin-top: 24px;">
+                    <h3 style="color: var(--secondary); margin-bottom: 16px; font-size: 1.2em;">Alert Details</h3>
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <div style="padding: 12px; background: rgba(220, 53, 69, 0.1); border-left: 4px solid var(--critical); border-radius: 6px;">
+                            <strong style="color: var(--critical);">CRITICAL:</strong> Differential fluids have NEVER been documented in service history. At 48,721 miles, front and rear differential fluid changes are OVERDUE and should be done immediately.
                         </div>
-                        <div class="item-details">
-                            <div class="detail-row">
-                                <div class="detail-label">Manufacturer Interval</div>
-                                <div class="detail-value">Every 120,000 miles</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Last Completed</div>
-                                <div class="detail-value">Never</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Next Due</div>
-                                <div class="detail-value">120,000 miles</div>
-                            </div>
+                        <div style="padding: 12px; background: rgba(253, 126, 20, 0.1); border-left: 4px solid var(--overdue); border-radius: 6px;">
+                            <strong style="color: var(--overdue);">OVERDUE:</strong> Brake fluid was last changed 01/24/2022 at 30,001 miles. At 3 years old, it requires immediate flush/exchange.
+                        </div>
+                        <div style="padding: 12px; background: rgba(30, 60, 114, 0.1); border-left: 4px solid var(--primary); border-radius: 6px;">
+                            <strong style="color: var(--primary);">AGE-BASED:</strong> Your Tundra is 7 years old (purchased 2018). Timing belt is due based on age or at 90K miles, whichever comes first. Consider inspection/replacement before September 2025.
                         </div>
                     </div>
+                </div>
+            </section>
 
-                    <div class="maintenance-item ok">
-                        <span class="category-badge">Engine</span>
-                        <div class="item-header">
-                            <div class="item-title">Timing Belt (5.7L V8)</div>
-                            <span class="status-badge ok">ATTENTION NEEDED</span>
-                        </div>
-                        <div class="item-details">
-                            <div class="detail-row">
-                                <div class="detail-label">Manufacturer Interval</div>
-                                <div class="detail-value">Every 90,000 miles or 7 years</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Last Completed</div>
-                                <div class="detail-value">Never</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Next Due</div>
-                                <div class="detail-value">90,000 miles OR September 2025 (7 years)</div>
-                            </div>
-                        </div>
+            <!-- MAINTENANCE SECTION -->
+            <section id="maintenance" class="section">
+                <div class="section-title">Maintenance Tracking</div>
+
+                <div class="filters-toolbar">
+                    <button class="filter-btn active" onclick="filterMaintenance(this, 'all')">All Items</button>
+                    <button class="filter-btn" onclick="filterMaintenance(this, 'critical')">Critical</button>
+                    <button class="filter-btn" onclick="filterMaintenance(this, 'overdue')">Overdue</button>
+                    <button class="filter-btn" onclick="filterMaintenance(this, 'due-soon')">Due Soon</button>
+                    <button class="filter-btn" onclick="filterMaintenance(this, 'ok')">Up to Date</button>
+                    <input type="text" class="search-bar" placeholder="Search maintenance items..." onkeyup="searchMaintenance(this.value)">
+                </div>
+
+                <!-- Engine Section -->
+                <div class="maintenance-category">
+                    <div class="category-header">
+                        <span class="mdi mdi-engine"></span>
+                        Engine Maintenance
                     </div>
+                    <div class="maintenance-grid">
+                        <div class="maintenance-card ok">
+                            <div class="maintenance-header">
+                                <div class="status-indicator ok">
+                                    <span class="mdi mdi-check-circle"></span>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div class="maintenance-title">Engine Oil & Filter</div>
+                                    <span class="status-badge ok">OK</span>
+                                </div>
+                            </div>
+                            <div class="maintenance-details">
+                                <div class="detail-row">
+                                    <span class="detail-label">Interval</span>
+                                    <span class="detail-value">Every 10,000 miles</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Last Completed</span>
+                                    <span class="detail-value">1/15/2025 @ 48,721 mi</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Next Due</span>
+                                    <span class="detail-value">58,721 miles</span>
+                                </div>
+                            </div>
+                        </div>
 
-                    <div class="maintenance-item due-soon">
-                        <span class="category-badge">Engine</span>
-                        <div class="item-header">
-                            <div class="item-title">Serpentine Belt</div>
-                            <span class="status-badge due-soon">DUE SOON</span>
+                        <div class="maintenance-card due-soon">
+                            <div class="maintenance-header">
+                                <div class="status-indicator due-soon">
+                                    <span class="mdi mdi-clock-outline"></span>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div class="maintenance-title">Engine Air Filter</div>
+                                    <span class="status-badge due-soon">DUE SOON</span>
+                                </div>
+                            </div>
+                            <div class="maintenance-details">
+                                <div class="detail-row">
+                                    <span class="detail-label">Interval</span>
+                                    <span class="detail-value">Every 30,000 miles</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Last Completed</span>
+                                    <span class="detail-value">~1/24/2022</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Next Due</span>
+                                    <span class="detail-value">60,000 miles</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="item-details">
-                            <div class="detail-row">
-                                <div class="detail-label">Manufacturer Interval</div>
-                                <div class="detail-value">Inspect every 60K, Replace as needed or ~100K miles</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Last Completed</div>
-                                <div class="detail-value">Unknown</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Next Due</div>
-                                <div class="detail-value">60,000 miles (inspection)</div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="maintenance-item ok">
-                        <span class="category-badge">Engine</span>
-                        <div class="item-header">
-                            <div class="item-title">Engine Coolant</div>
-                            <span class="status-badge ok">OK</span>
-                        </div>
-                        <div class="item-details">
-                            <div class="detail-row">
-                                <div class="detail-label">Manufacturer Interval</div>
-                                <div class="detail-value">Replace at 100,000 miles, then every 50K</div>
+                        <div class="maintenance-card critical">
+                            <div class="maintenance-header">
+                                <div class="status-indicator critical">
+                                    <span class="mdi mdi-alert-circle"></span>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div class="maintenance-title">Timing Belt (5.7L V8)</div>
+                                    <span class="status-badge critical">ATTENTION</span>
+                                </div>
                             </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Last Completed</div>
-                                <div class="detail-value">Never</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Next Due</div>
-                                <div class="detail-value">100,000 miles</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="maintenance-item ok">
-                        <span class="category-badge">Cabin</span>
-                        <div class="item-header">
-                            <div class="item-title">Cabin Air Filter</div>
-                            <span class="status-badge ok">OK</span>
-                        </div>
-                        <div class="item-details">
-                            <div class="detail-row">
-                                <div class="detail-label">Manufacturer Interval</div>
-                                <div class="detail-value">Every 10,000 miles or 12 months</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Last Completed</div>
-                                <div class="detail-value">1/15/2025 @ 48,721 miles (likely)</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Next Due</div>
-                                <div class="detail-value">58,721 miles or 1/2026</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="maintenance-item ok">
-                        <span class="category-badge">Brakes</span>
-                        <div class="item-header">
-                            <div class="item-title">Brake Pads & Rotors</div>
-                            <span class="status-badge ok">OK - Front pads/rotors serviced 11/22/2023</span>
-                        </div>
-                        <div class="item-details">
-                            <div class="detail-row">
-                                <div class="detail-label">Manufacturer Interval</div>
-                                <div class="detail-value">Inspect every 5,000 miles</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Last Completed</div>
-                                <div class="detail-value">1/15/2025 @ 48,721 miles (inspection)</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Next Due</div>
-                                <div class="detail-value">53,721 miles (next inspection)</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="maintenance-item due-soon">
-                        <span class="category-badge">Brakes</span>
-                        <div class="item-header">
-                            <div class="item-title">Brake Fluid</div>
-                            <span class="status-badge due-soon">DUE NOW</span>
-                        </div>
-                        <div class="item-details">
-                            <div class="detail-row">
-                                <div class="detail-label">Manufacturer Interval</div>
-                                <div class="detail-value">Every 30,000 miles or 36 months</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Last Completed</div>
-                                <div class="detail-value">1/24/2022 @ 30,001 miles</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Next Due</div>
-                                <div class="detail-value">60,000 miles or 1/2025</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="maintenance-item ok">
-                        <span class="category-badge">Tires</span>
-                        <div class="item-header">
-                            <div class="item-title">Tire Rotation</div>
-                            <span class="status-badge ok">OK</span>
-                        </div>
-                        <div class="item-details">
-                            <div class="detail-row">
-                                <div class="detail-label">Manufacturer Interval</div>
-                                <div class="detail-value">Every 5,000 miles or 6 months</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Last Completed</div>
-                                <div class="detail-value">1/15/2025 @ 48,721 miles</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Next Due</div>
-                                <div class="detail-value">53,721 miles or 7/2025</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="maintenance-item ok">
-                        <span class="category-badge">Tires</span>
-                        <div class="item-header">
-                            <div class="item-title">Wheel Alignment</div>
-                            <span class="status-badge ok">OK</span>
-                        </div>
-                        <div class="item-details">
-                            <div class="detail-row">
-                                <div class="detail-label">Manufacturer Interval</div>
-                                <div class="detail-value">As needed</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Last Completed</div>
-                                <div class="detail-value">1/15/2025 @ 48,721 miles</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Next Due</div>
-                                <div class="detail-value">As needed</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="maintenance-item due-soon">
-                        <span class="category-badge">Drivetrain</span>
-                        <div class="item-header">
-                            <div class="item-title">Transmission Fluid</div>
-                            <span class="status-badge due-soon">DUE SOON - CRITICAL</span>
-                        </div>
-                        <div class="item-details">
-                            <div class="detail-row">
-                                <div class="detail-label">Manufacturer Interval</div>
-                                <div class="detail-value">Inspect every 30K miles, Change every 60K miles (or 30K if towing)</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Last Completed</div>
-                                <div class="detail-value">Never documented</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Next Due</div>
-                                <div class="detail-value">60,000 miles</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="maintenance-item critical">
-                        <span class="category-badge">Drivetrain</span>
-                        <div class="item-header">
-                            <div class="item-title">Rear Differential Fluid</div>
-                            <span class="status-badge critical">OVERDUE</span>
-                        </div>
-                        <div class="item-details">
-                            <div class="detail-row">
-                                <div class="detail-label">Manufacturer Interval</div>
-                                <div class="detail-value">Inspect every 30K miles, Change every 60K-90K miles (30K if towing)</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Last Completed</div>
-                                <div class="detail-value">Never documented</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Next Due</div>
-                                <div class="detail-value">Overdue - Should be done by 60K miles</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="maintenance-item critical">
-                        <span class="category-badge">Drivetrain</span>
-                        <div class="item-header">
-                            <div class="item-title">Front Differential Fluid (4WD)</div>
-                            <span class="status-badge critical">OVERDUE</span>
-                        </div>
-                        <div class="item-details">
-                            <div class="detail-row">
-                                <div class="detail-label">Manufacturer Interval</div>
-                                <div class="detail-value">Inspect every 30K miles, Change every 50K-60K miles (30K if towing)</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Last Completed</div>
-                                <div class="detail-value">Never documented</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Next Due</div>
-                                <div class="detail-value">DUE NOW</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="maintenance-item due-soon">
-                        <span class="category-badge">Drivetrain</span>
-                        <div class="item-header">
-                            <div class="item-title">Transfer Case Fluid (4WD)</div>
-                            <span class="status-badge due-soon">DUE SOON</span>
-                        </div>
-                        <div class="item-details">
-                            <div class="detail-row">
-                                <div class="detail-label">Manufacturer Interval</div>
-                                <div class="detail-value">Inspect every 30K miles, Change every 60K miles (30K if towing)</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Last Completed</div>
-                                <div class="detail-value">Never documented</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Next Due</div>
-                                <div class="detail-value">DUE SOON</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="maintenance-item overdue">
-                        <span class="category-badge">Drivetrain</span>
-                        <div class="item-header">
-                            <div class="item-title">Propeller Shaft Lubrication (4WD)</div>
-                            <span class="status-badge overdue">OVERDUE</span>
-                        </div>
-                        <div class="item-details">
-                            <div class="detail-row">
-                                <div class="detail-label">Manufacturer Interval</div>
-                                <div class="detail-value">Every 15,000 miles</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Last Completed</div>
-                                <div class="detail-value">Unknown</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Next Due</div>
-                                <div class="detail-value">Overdue - Last should have been at 45K</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="maintenance-item due-soon">
-                        <span class="category-badge">Steering & Suspension</span>
-                        <div class="item-header">
-                            <div class="item-title">Steering Linkage & Ball Joints Inspection</div>
-                            <span class="status-badge due-soon">DUE SOON</span>
-                        </div>
-                        <div class="item-details">
-                            <div class="detail-row">
-                                <div class="detail-label">Manufacturer Interval</div>
-                                <div class="detail-value">Every 30,000 miles</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Last Completed</div>
-                                <div class="detail-value">Likely at 30K or 40K service</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Next Due</div>
-                                <div class="detail-value">60,000 miles</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="maintenance-item due-soon">
-                        <span class="category-badge">Exhaust</span>
-                        <div class="item-header">
-                            <div class="item-title">Exhaust System Inspection</div>
-                            <span class="status-badge due-soon">DUE SOON</span>
-                        </div>
-                        <div class="item-details">
-                            <div class="detail-row">
-                                <div class="detail-label">Manufacturer Interval</div>
-                                <div class="detail-value">Every 30,000 miles</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Last Completed</div>
-                                <div class="detail-value">Likely at 30K or 40K service</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Next Due</div>
-                                <div class="detail-value">60,000 miles</div>
+                            <div class="maintenance-details">
+                                <div class="detail-row">
+                                    <span class="detail-label">Interval</span>
+                                    <span class="detail-value">90,000 mi OR 7 years</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Last Completed</span>
+                                    <span class="detail-value">Never</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Next Due</span>
+                                    <span class="detail-value">September 2025 (age)</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="section">
-                <h2 class="section-title">📅 Complete Service History</h2>
-                <div class="service-history">
 
-                    <div class="history-item">
-                        <div class="history-date">January 15, 2025</div>
-                        <div class="history-mileage">📍 Mileage: 48,721 miles</div>
-                        <div class="history-services">MISC INSPECTION, TOYOTACARE+ 45K/60MO, OIL & FILTER CHANGE, MULTI POINT INSPECT, FLOOR MAT NOTICE, BULB CONCERN, MT & BALANCE 4, 4 WHEEL ALIGNMENT</div>
+                <!-- Drivetrain Section (Critical) -->
+                <div class="maintenance-category">
+                    <div class="category-header">
+                        <span class="mdi mdi-car-turbocharger"></span>
+                        Drivetrain (CRITICAL)
                     </div>
+                    <div class="maintenance-grid">
+                        <div class="maintenance-card critical">
+                            <div class="maintenance-header">
+                                <div class="status-indicator critical">
+                                    <span class="mdi mdi-alert-circle"></span>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div class="maintenance-title">Front Differential Fluid</div>
+                                    <span class="status-badge critical">OVERDUE</span>
+                                </div>
+                            </div>
+                            <div class="maintenance-details">
+                                <div class="detail-row">
+                                    <span class="detail-label">Interval</span>
+                                    <span class="detail-value">50,000-60,000 miles</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Last Completed</span>
+                                    <span class="detail-value">Never documented</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Next Due</span>
+                                    <span class="detail-value">IMMEDIATELY</span>
+                                </div>
+                            </div>
+                        </div>
 
-                    <div class="history-item">
-                        <div class="history-date">November 22, 2023</div>
-                        <div class="history-mileage">📍 Mileage: 42,341 miles</div>
-                        <div class="history-services">TOYOTACARE+ 40K/54MO, FLOOR MAT NOTICE, FRT PADS TURN ROTORS, FUEL/AIR INDCTN SVC</div>
-                    </div>
+                        <div class="maintenance-card critical">
+                            <div class="maintenance-header">
+                                <div class="status-indicator critical">
+                                    <span class="mdi mdi-alert-circle"></span>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div class="maintenance-title">Rear Differential Fluid</div>
+                                    <span class="status-badge critical">OVERDUE</span>
+                                </div>
+                            </div>
+                            <div class="maintenance-details">
+                                <div class="detail-row">
+                                    <span class="detail-label">Interval</span>
+                                    <span class="detail-value">60,000-90,000 miles</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Last Completed</span>
+                                    <span class="detail-value">Never documented</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Next Due</span>
+                                    <span class="detail-value">IMMEDIATELY</span>
+                                </div>
+                            </div>
+                        </div>
 
-                    <div class="history-item">
-                        <div class="history-date">November 25, 2022</div>
-                        <div class="history-mileage">📍 Mileage: 35,701 miles</div>
-                        <div class="history-services">FLOOR MAT NOTICE, TOYOTACARE+ 35K/42MO, 4 WHEEL ALIGNMENT, TUNDRA FIRE RISK</div>
-                    </div>
+                        <div class="maintenance-card due-soon">
+                            <div class="maintenance-header">
+                                <div class="status-indicator due-soon">
+                                    <span class="mdi mdi-clock-alert-outline"></span>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div class="maintenance-title">Transmission Fluid</div>
+                                    <span class="status-badge critical">CRITICAL</span>
+                                </div>
+                            </div>
+                            <div class="maintenance-details">
+                                <div class="detail-row">
+                                    <span class="detail-label">Interval</span>
+                                    <span class="detail-value">60,000 miles normal</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Last Completed</span>
+                                    <span class="detail-value">Never documented</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Next Due</span>
+                                    <span class="detail-value">60,000 miles</span>
+                                </div>
+                            </div>
+                        </div>
 
-                    <div class="history-item">
-                        <div class="history-date">January 24, 2022</div>
-                        <div class="history-mileage">📍 Mileage: 30,001 miles</div>
-                        <div class="history-services">TOYOTA CARE PLUS, BRAKE FLUID EXCHANGE, RECALL/SSC INSPECT, FLOOR MAT NOTICE, TOYOTACARE+ 30K/36MO</div>
-                    </div>
-
-                    <div class="history-item">
-                        <div class="history-date">June 08, 2020</div>
-                        <div class="history-mileage">📍 Mileage: 26,636 miles</div>
-                        <div class="history-services">TOYOTA CARE 25K SYN</div>
-                    </div>
-
-                    <div class="history-item">
-                        <div class="history-date">November 05, 2019</div>
-                        <div class="history-mileage">📍 Mileage: 20,915 miles</div>
-                        <div class="history-services">FLOOR MAT NOTICE, TXM BASIC, TOYOTA CARE 20K SYN, RADAR SENSOR, ENGINE ECU UPDATE</div>
-                    </div>
-
-                    <div class="history-item">
-                        <div class="history-date">June 14, 2019</div>
-                        <div class="history-mileage">📍 Mileage: 17,601 miles</div>
-                        <div class="history-services">FLOOR MAT NOTICE, TOYOTA CARE 15K SYN, INSPECTIONS</div>
-                    </div>
-
-                    <div class="history-item">
-                        <div class="history-date">March 04, 2019</div>
-                        <div class="history-mileage">📍 Mileage: 12,117 miles</div>
-                        <div class="history-services">10K SYN OIL</div>
-                    </div>
-
-                    <div class="history-item">
-                        <div class="history-date">November 03, 2018</div>
-                        <div class="history-mileage">📍 Mileage: 5,708 miles</div>
-                        <div class="history-services">RECALL, 5K SYN OIL</div>
+                        <div class="maintenance-card due-soon">
+                            <div class="maintenance-header">
+                                <div class="status-indicator due-soon">
+                                    <span class="mdi mdi-clock-outline"></span>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div class="maintenance-title">Transfer Case Fluid (4WD)</div>
+                                    <span class="status-badge due-soon">DUE SOON</span>
+                                </div>
+                            </div>
+                            <div class="maintenance-details">
+                                <div class="detail-row">
+                                    <span class="detail-label">Interval</span>
+                                    <span class="detail-value">60,000 miles</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Last Completed</span>
+                                    <span class="detail-value">Never documented</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Next Due</span>
+                                    <span class="detail-value">60,000 miles</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <button class="print-button" onclick="window.print()">🖨️ Print Dashboard</button>
-        </div>
+                <!-- Brakes Section -->
+                <div class="maintenance-category">
+                    <div class="category-header">
+                        <span class="mdi mdi-brake-fluid"></span>
+                        Brakes & Suspension
+                    </div>
+                    <div class="maintenance-grid">
+                        <div class="maintenance-card critical">
+                            <div class="maintenance-header">
+                                <div class="status-indicator critical">
+                                    <span class="mdi mdi-alert-circle"></span>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div class="maintenance-title">Brake Fluid Exchange</div>
+                                    <span class="status-badge critical">DUE NOW</span>
+                                </div>
+                            </div>
+                            <div class="maintenance-details">
+                                <div class="detail-row">
+                                    <span class="detail-label">Interval</span>
+                                    <span class="detail-value">30,000 mi / 36 months</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Last Completed</span>
+                                    <span class="detail-value">1/24/2022 @ 30,001 mi</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Next Due</span>
+                                    <span class="detail-value">OVERDUE (3 yrs old)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="maintenance-card ok">
+                            <div class="maintenance-header">
+                                <div class="status-indicator ok">
+                                    <span class="mdi mdi-check-circle"></span>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div class="maintenance-title">Brake Pads & Rotors</div>
+                                    <span class="status-badge ok">OK</span>
+                                </div>
+                            </div>
+                            <div class="maintenance-details">
+                                <div class="detail-row">
+                                    <span class="detail-label">Last Serviced</span>
+                                    <span class="detail-value">11/22/2023</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Last Inspection</span>
+                                    <span class="detail-value">1/15/2025</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Status</span>
+                                    <span class="detail-value">Monitor routine</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tires Section -->
+                <div class="maintenance-category">
+                    <div class="category-header">
+                        <span class="mdi mdi-tire"></span>
+                        Tires & Wheels
+                    </div>
+                    <div class="maintenance-grid">
+                        <div class="maintenance-card ok">
+                            <div class="maintenance-header">
+                                <div class="status-indicator ok">
+                                    <span class="mdi mdi-check-circle"></span>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div class="maintenance-title">Tire Rotation</div>
+                                    <span class="status-badge ok">OK</span>
+                                </div>
+                            </div>
+                            <div class="maintenance-details">
+                                <div class="detail-row">
+                                    <span class="detail-label">Interval</span>
+                                    <span class="detail-value">Every 5,000 miles</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Last Completed</span>
+                                    <span class="detail-value">1/15/2025</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Next Due</span>
+                                    <span class="detail-value">53,721 miles</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="maintenance-card ok">
+                            <div class="maintenance-header">
+                                <div class="status-indicator ok">
+                                    <span class="mdi mdi-check-circle"></span>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div class="maintenance-title">4-Wheel Alignment</div>
+                                    <span class="status-badge ok">OK</span>
+                                </div>
+                            </div>
+                            <div class="maintenance-details">
+                                <div class="detail-row">
+                                    <span class="detail-label">Type</span>
+                                    <span class="detail-value">As-needed service</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Last Completed</span>
+                                    <span class="detail-value">1/15/2025</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Status</span>
+                                    <span class="detail-value">Current</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SERVICE HISTORY SECTION -->
+            <section id="history" class="section">
+                <div class="section-title">Complete Service History</div>
+
+                <div class="history-table-container">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Mileage</th>
+                                <th>Service Performed</th>
+                                <th>Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="history-date">01/15/2025</td>
+                                <td class="history-mileage">48,721</td>
+                                <td class="history-services">MISC INSPECTION, TOYOTACARE+ 45K/60MO, OIL & FILTER CHANGE, MULTI POINT INSPECT, BULB CONCERN, TIRE MOUNT & BALANCE, 4-WHEEL ALIGNMENT</td>
+                                <td class="history-status">
+                                    <span class="status-label major">Major</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="history-date">11/22/2023</td>
+                                <td class="history-mileage">42,341</td>
+                                <td class="history-services">TOYOTACARE+ 40K/54MO, FLOOR MAT NOTICE, FRONT PADS TURN ROTORS, FUEL/AIR INDUCTION SERVICE</td>
+                                <td class="history-status">
+                                    <span class="status-label major">Major</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="history-date">11/25/2022</td>
+                                <td class="history-mileage">35,701</td>
+                                <td class="history-services">FLOOR MAT NOTICE, TOYOTACARE+ 35K/42MO, 4-WHEEL ALIGNMENT, TUNDRA FIRE RISK RECALL</td>
+                                <td class="history-status">
+                                    <span class="mdi mdi-alert-decagram" style="color: var(--critical);"></span>
+                                    <span class="status-label recall">Recall</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="history-date">01/24/2022</td>
+                                <td class="history-mileage">30,001</td>
+                                <td class="history-services">TOYOTA CARE PLUS, BRAKE FLUID EXCHANGE, RECALL/SSC INSPECT, TOYOTACARE+ 30K/36MO</td>
+                                <td class="history-status">
+                                    <span class="mdi mdi-alert-decagram" style="color: var(--critical);"></span>
+                                    <span class="status-label recall">Recall</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="history-date">06/08/2020</td>
+                                <td class="history-mileage">26,636</td>
+                                <td class="history-services">TOYOTA CARE 25K SYN OIL</td>
+                                <td class="history-status">
+                                    <span class="status-label routine">Routine</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="history-date">11/05/2019</td>
+                                <td class="history-mileage">20,915</td>
+                                <td class="history-services">FLOOR MAT NOTICE, TXM BASIC, TOYOTA CARE 20K SYN, RADAR SENSOR, ENGINE ECU UPDATE</td>
+                                <td class="history-status">
+                                    <span class="status-label major">Major</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="history-date">06/14/2019</td>
+                                <td class="history-mileage">17,601</td>
+                                <td class="history-services">FLOOR MAT NOTICE, TOYOTA CARE 15K SYN, INSPECTIONS</td>
+                                <td class="history-status">
+                                    <span class="status-label routine">Routine</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="history-date">03/04/2019</td>
+                                <td class="history-mileage">12,117</td>
+                                <td class="history-services">10K SYNTHETIC OIL</td>
+                                <td class="history-status">
+                                    <span class="status-label routine">Routine</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="history-date">11/03/2018</td>
+                                <td class="history-mileage">5,708</td>
+                                <td class="history-services">RECALL, 5K SYNTHETIC OIL</td>
+                                <td class="history-status">
+                                    <span class="mdi mdi-alert-decagram" style="color: var(--critical);"></span>
+                                    <span class="status-label recall">Recall</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- TOOLS SECTION -->
+            <section id="tools" class="section">
+                <div class="section-title">Tools & Export</div>
+
+                <div class="summary-section">
+                    <h3 style="color: var(--secondary); margin-bottom: 16px; font-size: 1.2em;">Dashboard Actions</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">
+                        <button class="toolbar-btn" onclick="window.print()" style="display: flex; align-items: center; justify-content: center; padding: 16px; cursor: pointer; font-size: 1em; width: 100%;">
+                            <span class="mdi mdi-printer"></span>
+                            Print Dashboard
+                        </button>
+                        <button class="toolbar-btn" onclick="alert('Export to CSV functionality would download a CSV file with all maintenance data.')" style="display: flex; align-items: center; justify-content: center; padding: 16px; cursor: pointer; font-size: 1em; width: 100%;">
+                            <span class="mdi mdi-file-download"></span>
+                            Export to CSV
+                        </button>
+                        <button class="toolbar-btn" onclick="alert('This would open a scheduling interface to book service with dealership.')" style="display: flex; align-items: center; justify-content: center; padding: 16px; cursor: pointer; font-size: 1em; width: 100%;">
+                            <span class="mdi mdi-calendar-check"></span>
+                            Schedule Service
+                        </button>
+                    </div>
+                </div>
+
+                <div class="summary-section" style="margin-top: 24px;">
+                    <h3 style="color: var(--secondary); margin-bottom: 16px; font-size: 1.2em;">Quick Reference</h3>
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <div style="padding: 12px 16px; background: rgba(40, 167, 69, 0.1); border-radius: 8px; border-left: 4px solid var(--ok);">
+                            <strong style="color: var(--ok);">Total Services on Record:</strong> 9 visits
+                        </div>
+                        <div style="padding: 12px 16px; background: rgba(220, 53, 69, 0.1); border-radius: 8px; border-left: 4px solid var(--critical);">
+                            <strong style="color: var(--critical);">Critical Maintenance Items:</strong> 2 requiring immediate attention
+                        </div>
+                        <div style="padding: 12px 16px; background: rgba(253, 126, 20, 0.1); border-radius: 8px; border-left: 4px solid var(--overdue);">
+                            <strong style="color: var(--overdue);">Overdue Items:</strong> 3 items past recommended intervals
+                        </div>
+                        <div style="padding: 12px 16px; background: rgba(255, 193, 7, 0.1); border-radius: 8px; border-left: 4px solid var(--due-soon);">
+                            <strong style="color: var(--due-soon);">Due Soon:</strong> 7 items approaching maintenance windows
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
     </div>
+
+    <!-- Floating Toolbar -->
+    <div class="floating-toolbar">
+        <button class="toolbar-btn" onclick="window.print()">
+            <span class="mdi mdi-printer"></span>
+            <span>Print</span>
+        </button>
+        <button class="toolbar-btn" onclick="alert('Export to CSV')">
+            <span class="mdi mdi-file-download"></span>
+            <span>Export</span>
+        </button>
+        <button class="toolbar-btn" onclick="alert('Schedule Service')">
+            <span class="mdi mdi-calendar-check"></span>
+            <span>Schedule</span>
+        </button>
+    </div>
+
+    <script>
+        // Section switching
+        function switchSection(sectionId, element) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+
+            // Update active nav tab
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            element.classList.add('active');
+        }
+
+        // Filter functionality
+        function filterMaintenance(button, status) {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            button.classList.add('active');
+            console.log('Filtering by:', status);
+        }
+
+        // Search functionality
+        function searchMaintenance(query) {
+            console.log('Searching for:', query);
+        }
+    </script>
 </body>
 </html>
